@@ -1,0 +1,18 @@
+# Fanfare Inventory Tracker - Cloudflare Pages Configuration
+name = "fanfare-inventory-tracker"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
+
+# D1 Database binding
+# After creating the database with `wrangler d1 create fanfare-inventory-db`
+# Update the database_id below with the actual ID
+[[d1_databases]]
+binding = "DB"
+database_name = "fanfare-inventory-db"
+database_id = "YOUR_DATABASE_ID_HERE"
+
+# Environment variables (set via wrangler secret)
+# JWT_SECRET - for signing JWT tokens
+
+[vars]
+ENVIRONMENT = "development"
