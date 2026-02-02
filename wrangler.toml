@@ -10,7 +10,7 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "fanfare-inventory-db"
-database_id = "YOUR_DATABASE_ID_HERE"
+database_id = "cc1aa46f-ea6e-4ad1-a45f-2f31a3694c4a"
 
 # Environment variables (set via wrangler secret)
 # JWT_SECRET - for signing JWT tokens
