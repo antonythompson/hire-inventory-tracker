@@ -4,15 +4,30 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npm run build && npm run pages:dev",
+    "dev:vite": "vite",
+    "dev:watch": "vite build --watch",
     "build": "vite build",
     "preview": "vite preview",
-    "pages:dev": "wrangler pages dev dist --d1=DB",
+    "typecheck": "tsc --noEmit",
+
+    "pages:dev": "wrangler pages dev dist --d1=DB --live-reload",
     "pages:deploy": "npm run build && wrangler pages deploy dist",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "wrangler d1 migrations apply fanfare-inventory-db --local",
-    "db:migrate:prod": "wrangler d1 migrations apply fanfare-inventory-db --remote",
-    "db:studio": "drizzle-kit studio"
+
+    "db:create": "wrangler d1 create fanfare-inventory-db",
+    "db:init": "npm run db:migrate:local && npm run db:seed:local",
+    "db:migrate:local": "wrangler d1 execute fanfare-inventory-db --local --file=./db/migrations/0001_initial.sql",
+    "db:seed:local": "wrangler d1 execute fanfare-inventory-db --local --file=./db/migrations/0002_seed.sql",
+    "db:migrate:prod": "wrangler d1 execute fanfare-inventory-db --remote --file=./db/migrations/0001_initial.sql",
+    "db:seed:prod": "wrangler d1 execute fanfare-inventory-db --remote --file=./db/migrations/0002_seed.sql",
+    "db:query": "wrangler d1 execute fanfare-inventory-db --local --command",
+    "db:query:prod": "wrangler d1 execute fanfare-inventory-db --remote --command",
+    "db:studio": "drizzle-kit studio",
+    "db:reset": "rm -rf .wrangler/state && npm run db:init",
+
+    "secret:set": "wrangler secret put",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=fanfare-inventory-tracker",
+    "deploy:prod": "npm run build && wrangler pages deploy dist --project-name=fanfare-inventory-tracker --branch=main"
   },
   "dependencies": {
     "preact": "^10.19.3",
