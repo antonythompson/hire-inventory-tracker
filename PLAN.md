@@ -177,46 +177,47 @@ CREATE TABLE order_items (
 ## Implementation Phases
 
 ### Phase 1: Project Setup
-- [ ] Create project directory and git repo
-- [ ] Initialize wrangler project
-- [ ] Set up Vite + Preact + Tailwind
-- [ ] Configure D1 database
-- [ ] Set up Drizzle ORM and schema
+- [x] Create project directory and git repo
+- [x] Initialize wrangler project
+- [x] Set up Vite + Preact + Tailwind
+- [x] Configure D1 database
+- [x] Set up Drizzle ORM and schema
 
 ### Phase 2: Authentication
-- [ ] Create users table and seed initial user
-- [ ] Implement login endpoint with JWT
-- [ ] Build login UI component
-- [ ] Add auth middleware for protected routes
-- [ ] Implement logout
+- [x] Create users table and seed initial user
+- [x] Implement login endpoint with JWT
+- [x] Build login UI component
+- [x] Add auth middleware for protected routes
+- [x] Implement logout
 
 ### Phase 3: Item Catalog
-- [ ] Implement catalog CRUD API
-- [ ] Build catalog management UI
-- [ ] Seed initial items (chairs, tables, covers, etc.)
+- [x] Implement catalog CRUD API
+- [x] Build catalog management UI
+- [x] Seed initial items (chairs, tables, covers, etc.)
 
 ### Phase 4: Orders
-- [ ] Implement orders CRUD API
-- [ ] Build order list view
-- [ ] Build create/edit order form
-- [ ] Build order detail view with items
+- [x] Implement orders CRUD API
+- [x] Build order list view
+- [x] Build create/edit order form
+- [x] Build order detail view with items
+- [x] Add item to order functionality
 
 ### Phase 5: Check In/Out
-- [ ] Implement checkout endpoint
-- [ ] Implement checkin endpoint
-- [ ] Build checkout modal UI
-- [ ] Build checkin modal UI
-- [ ] Handle partial returns
+- [x] Implement checkout endpoint
+- [x] Implement checkin endpoint
+- [x] Build checkout modal UI
+- [x] Build checkin modal UI
+- [x] Handle partial returns
 
 ### Phase 6: Dashboard
-- [ ] Implement dashboard stats endpoint
-- [ ] Build dashboard UI
-- [ ] Show overdue items
-- [ ] Show recent activity
+- [x] Implement dashboard stats endpoint
+- [x] Build dashboard UI
+- [x] Show overdue items
+- [x] Show recent activity
 
 ### Phase 7: PWA & Polish
-- [ ] Add service worker
-- [ ] Create manifest.json and icons
+- [x] Add service worker
+- [x] Create manifest.json and icons
 - [ ] Test offline functionality
 - [ ] Mobile UI refinements
 - [ ] Deploy to Cloudflare Pages

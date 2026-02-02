@@ -33,6 +33,7 @@ export function OrderDetail({ orderId, onBack }: OrderDetailProps) {
   const [loading, setLoading] = useState(true);
   const [showCheckout, setShowCheckout] = useState(false);
   const [showCheckin, setShowCheckin] = useState(false);
+  const [showAddItem, setShowAddItem] = useState(false);
 
   const loadOrder = () => {
     setLoading(true);
@@ -123,7 +124,10 @@ export function OrderDetail({ orderId, onBack }: OrderDetailProps) {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200">
         <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
           <h3 class="font-medium text-slate-800">Items ({order.items.length})</h3>
-          <button class="text-sm text-blue-600 hover:text-blue-700">
+          <button
+            onClick={() => setShowAddItem(true)}
+            class="text-sm text-blue-600 hover:text-blue-700"
+          >
             + Add Item
           </button>
         </div>
@@ -209,6 +213,18 @@ export function OrderDetail({ orderId, onBack }: OrderDetailProps) {
           onSubmit={async (items) => {
             await api.checkinOrder(orderId, items);
             setShowCheckin(false);
+            loadOrder();
+          }}
+        />
+      )}
+
+      {/* Add Item Modal */}
+      {showAddItem && (
+        <AddItemModal
+          orderId={orderId}
+          onClose={() => setShowAddItem(false)}
+          onAdded={() => {
+            setShowAddItem(false);
             loadOrder();
           }}
         />
@@ -395,4 +411,171 @@ function formatDate(dateStr: string): string {
     day: 'numeric',
     month: 'short',
   });
+}
+
+interface AddItemModalProps {
+  orderId: number;
+  onClose: () => void;
+  onAdded: () => void;
+}
+
+function AddItemModal({ orderId, onClose, onAdded }: AddItemModalProps) {
+  const [catalogItems, setCatalogItems] = useState<Array<{ id: number; name: string; category: string | null }>>([]);
+  const [selectedItem, setSelectedItem] = useState<number | null>(null);
+  const [customName, setCustomName] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<'catalog' | 'custom'>('catalog');
+
+  useEffect(() => {
+    api.getCatalogItems().then((items) => {
+      setCatalogItems(items.filter((i) => i.isActive));
+    });
+  }, []);
+
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await api.addItemToOrder(orderId, {
+        catalogItemId: mode === 'catalog' ? selectedItem! : undefined,
+        customItemName: mode === 'custom' ? customName : undefined,
+        quantity,
+      });
+      onAdded();
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
+
+  const canSubmit = mode === 'catalog' ? selectedItem !== null : customName.trim() !== '';
+
+  return (
+    <div class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90vh] overflow-auto">
+        <div class="sticky top-0 bg-white px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+          <h3 class="font-semibold text-slate-800">Add Item</h3>
+          <button onClick={onClose} class="text-slate-400 hover:text-slate-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} class="p-4 space-y-4">
+          {/* Mode toggle */}
+          <div class="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setMode('catalog')}
+              class={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                mode === 'catalog'
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-slate-100 text-slate-600'
+              }`}
+            >
+              From Catalog
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('custom')}
+              class={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                mode === 'custom'
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-slate-100 text-slate-600'
+              }`}
+            >
+              Custom Item
+            </button>
+          </div>
+
+          {mode === 'catalog' ? (
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Select Item
+              </label>
+              <div class="space-y-2 max-h-48 overflow-y-auto">
+                {catalogItems.map((item) => (
+                  <label
+                    key={item.id}
+                    class={`flex items-center p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selectedItem === item.id
+                        ? 'border-slate-800 bg-slate-50'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="catalogItem"
+                      value={item.id}
+                      checked={selectedItem === item.id}
+                      onChange={() => setSelectedItem(item.id)}
+                      class="sr-only"
+                    />
+                    <div>
+                      <p class="font-medium text-slate-800">{item.name}</p>
+                      {item.category && (
+                        <p class="text-xs text-slate-500">{item.category}</p>
+                      )}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">
+                Item Name
+              </label>
+              <input
+                type="text"
+                value={customName}
+                onInput={(e) => setCustomName((e.target as HTMLInputElement).value)}
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none"
+                placeholder="Enter custom item name"
+              />
+            </div>
+          )}
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">
+              Quantity
+            </label>
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                value={quantity}
+                onInput={(e) => setQuantity(parseInt((e.target as HTMLInputElement).value) || 1)}
+                min="1"
+                class="w-20 text-center px-2 py-2 border border-slate-300 rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => q + 1)}
+                class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || !canSubmit}
+            class="w-full bg-slate-800 text-white py-3 rounded-lg font-medium hover:bg-slate-700 transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Adding...' : 'Add to Order'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 }

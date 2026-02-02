@@ -125,6 +125,16 @@ export const api = {
   deleteOrder: (id: number) =>
     request<{ success: boolean }>(`/orders/${id}`, { method: 'DELETE' }),
 
+  addItemToOrder: (orderId: number, data: {
+    catalogItemId?: number;
+    customItemName?: string;
+    quantity: number;
+  }) =>
+    request<{ id: number }>(`/orders/${orderId}/items`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
   checkoutOrder: (id: number, items: Array<{ itemId: number; quantity: number }>) =>
     request<{ success: boolean }>(`/orders/${id}/checkout`, {
       method: 'POST',
