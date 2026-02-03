@@ -3,25 +3,68 @@
 -- Default admin user (password: admin123)
 -- Hash is SHA-256 of 'admin123'
 INSERT INTO users (email, password_hash, name) VALUES
-  ('admin@fanfare.co.nz', '240be518fabd2724ddb6f04eeb9d5b87d5b1e7ed6d87e7be313d5e3b2b23e8d3', 'Admin');
+  ('admin@fanfare.co.nz', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'Admin');
 
--- Sample catalog items
+-- Catalog items from fanfarenz.com/hiring/
+
+-- Tables
 INSERT INTO catalog_items (name, category, description) VALUES
-  ('Folding Chair (White)', 'Furniture', 'Standard white folding chair'),
-  ('Folding Chair (Black)', 'Furniture', 'Standard black folding chair'),
-  ('Round Table (6ft)', 'Furniture', '6 foot round banquet table'),
-  ('Round Table (5ft)', 'Furniture', '5 foot round banquet table'),
-  ('Trestle Table (6ft)', 'Furniture', '6 foot rectangular trestle table'),
-  ('Trestle Table (8ft)', 'Furniture', '8 foot rectangular trestle table'),
-  ('White Tablecloth (Round)', 'Linen', 'White cloth for round tables'),
-  ('White Tablecloth (Rect)', 'Linen', 'White cloth for rectangular tables'),
-  ('Black Tablecloth (Round)', 'Linen', 'Black cloth for round tables'),
-  ('Black Tablecloth (Rect)', 'Linen', 'Black cloth for rectangular tables'),
-  ('Chair Cover (White)', 'Linen', 'Stretch chair cover - white'),
-  ('Chair Cover (Black)', 'Linen', 'Stretch chair cover - black'),
-  ('Napkin (White)', 'Linen', 'Cloth napkin - white'),
-  ('Napkin (Black)', 'Linen', 'Cloth napkin - black'),
-  ('Centerpiece Vase', 'Decor', 'Glass vase for table centerpieces'),
-  ('Fairy Lights (10m)', 'Decor', '10 meter string of fairy lights'),
-  ('Lantern (Large)', 'Decor', 'Large decorative lantern'),
-  ('Lantern (Small)', 'Decor', 'Small decorative lantern');
+  ('1.2M Table', 'Tables', 'Small round/rectangular table'),
+  ('1.8M Table', 'Tables', 'Large round/rectangular table'),
+  ('Trestle Table', 'Tables', 'Standard trestle table'),
+  ('Kids Table', 'Tables', 'Small table for children');
+
+-- Chairs
+INSERT INTO catalog_items (name, category, description) VALUES
+  ('Black Padded Chair', 'Chairs', 'Black padded folding chair'),
+  ('White Plastic Chair', 'Chairs', 'Standard white plastic chair'),
+  ('White Chair (Premium)', 'Chairs', 'Premium white chair'),
+  ('Traditional Gold & Maroon Chair', 'Chairs', 'Decorative gold and maroon chair'),
+  ('Kids Chair', 'Chairs', 'Small chair for children'),
+  ('Red Chair', 'Chairs', 'Red decorative chair');
+
+-- Chair Covers & Sashes
+INSERT INTO catalog_items (name, category, description) VALUES
+  ('Chair Cover (White)', 'Chair Covers', 'White stretch chair cover'),
+  ('Chair Cover (Black)', 'Chair Covers', 'Black stretch chair cover'),
+  ('Chair Tie/Bow', 'Chair Covers', 'Decorative chair sash/bow');
+
+-- Table Covers
+INSERT INTO catalog_items (name, category, description) VALUES
+  ('Trestle Table Cover', 'Table Covers', 'Cover for trestle table'),
+  ('White Table Cover', 'Table Covers', 'White tablecloth'),
+  ('Black Table Cover', 'Table Covers', 'Black tablecloth'),
+  ('Green Table Runner', 'Table Covers', 'Green table runner');
+
+-- Couches & Sofas
+INSERT INTO catalog_items (name, category, description) VALUES
+  ('Big White Chaise Couch', 'Couches & Sofas', 'Large white chaise lounge'),
+  ('Gold Leaf Chaise', 'Couches & Sofas', 'Gold leaf decorative chaise'),
+  ('Low White Couch', 'Couches & Sofas', 'Low-profile white couch'),
+  ('White Sofa', 'Couches & Sofas', 'White sofa');
+
+-- Pedestals & Plinths
+INSERT INTO catalog_items (name, category, description) VALUES
+  ('Ganesh White Pedestal', 'Pedestals & Plinths', 'White decorative pedestal'),
+  ('White Cylinder Plinth (Small)', 'Pedestals & Plinths', 'Small white cylinder plinth'),
+  ('White Cylinder Plinth (Medium)', 'Pedestals & Plinths', 'Medium white cylinder plinth'),
+  ('White Cylinder Plinth (Large)', 'Pedestals & Plinths', 'Large white cylinder plinth'),
+  ('Premium Golden Pedestal', 'Pedestals & Plinths', 'Gold decorative pedestal');
+
+-- Backdrops
+INSERT INTO catalog_items (name, category, description) VALUES
+  ('Pink/Blue Backdrop', 'Backdrops', 'Pink and blue backdrop'),
+  ('Shiny Gold Round Arch', 'Backdrops', 'Gold circular arch backdrop'),
+  ('White Backdrop Drapes', 'Backdrops', 'White draping backdrop'),
+  ('White Backdrop', 'Backdrops', 'Standard white backdrop');
+
+-- Decorations
+INSERT INTO catalog_items (name, category, description) VALUES
+  ('Cake Table Decorations', 'Decorations', 'Decorative setup for cake table'),
+  ('Flower Arrangements', 'Decorations', 'Floral decorations'),
+  ('Fairy Lights', 'Decorations', 'String fairy lights'),
+  ('Lanterns', 'Decorations', 'Decorative lanterns');
+
+-- Audio Equipment
+INSERT INTO catalog_items (name, category, description) VALUES
+  ('Speakers with Mic', 'Audio', 'Speaker system with microphone');
