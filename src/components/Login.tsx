@@ -3,12 +3,15 @@ import { useAuth } from '../hooks/useAuth';
 
 export function Login() {
   const { login, loading, error } = useAuth();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
-    await login(email, password);
+    const success = await login(identifier, password);
+    if (success) {
+      window.location.reload();
+    }
   };
 
   return (
@@ -29,14 +32,14 @@ export function Login() {
 
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-1">
-                Email
+                Email or Username
               </label>
               <input
-                type="email"
-                value={email}
-                onInput={(e) => setEmail((e.target as HTMLInputElement).value)}
+                type="text"
+                value={identifier}
+                onInput={(e) => setIdentifier((e.target as HTMLInputElement).value)}
                 class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none transition-shadow"
-                placeholder="you@example.com"
+                placeholder="you@example.com or username"
                 required
                 disabled={loading}
               />

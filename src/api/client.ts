@@ -25,19 +25,37 @@ async function request<T>(
   return response.json();
 }
 
+export type UserRole = 'admin' | 'manager' | 'staff';
+
+export interface User {
+  id: number;
+  email: string;
+  username: string | null;
+  name: string;
+  role: UserRole;
+  isActive?: boolean;
+  createdAt?: string;
+}
+
 export const api = {
   // Auth
-  login: (email: string, password: string) =>
-    request<{ token: string; user: { id: number; email: string; name: string } }>(
+  login: (identifier: string, password: string) =>
+    request<{ token: string; user: User }>(
       '/auth/login',
       {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier, password }),
       }
     ),
 
   getMe: () =>
-    request<{ id: number; email: string; name: string }>('/auth/me'),
+    request<User>('/auth/me'),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<{ success: boolean }>('/auth/password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    }),
 
   // Dashboard
   getDashboard: () =>
@@ -180,4 +198,44 @@ export const api = {
 
   deleteCatalogItem: (id: number) =>
     request<{ success: boolean }>(`/items/${id}`, { method: 'DELETE' }),
+
+  // Users
+  getUsers: () =>
+    request<User[]>('/users'),
+
+  getUser: (id: number) =>
+    request<User>(`/users/${id}`),
+
+  createUser: (data: {
+    email: string;
+    username?: string;
+    password: string;
+    name: string;
+    role: UserRole;
+  }) =>
+    request<{ id: number }>('/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateUser: (id: number, data: Partial<{
+    email: string;
+    username: string;
+    name: string;
+    role: UserRole;
+    isActive: boolean;
+  }>) =>
+    request<{ success: boolean }>(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteUser: (id: number) =>
+    request<{ success: boolean }>(`/users/${id}`, { method: 'DELETE' }),
+
+  changeUserPassword: (id: number, newPassword: string) =>
+    request<{ success: boolean }>(`/users/${id}/password`, {
+      method: 'PUT',
+      body: JSON.stringify({ newPassword }),
+    }),
 };

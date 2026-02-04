@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/d1';
-import { eq } from 'drizzle-orm';
+import { eq, or } from 'drizzle-orm';
 import { users } from '../../../db/schema';
+import type { UserRole } from '../../_middleware';
 
 interface Env {
   DB: D1Database;
@@ -8,18 +9,26 @@ interface Env {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const { email, password } = await context.request.json() as { email: string; password: string };
+  const { identifier, password } = await context.request.json() as { identifier: string; password: string };
 
-  if (!email || !password) {
-    return Response.json({ message: 'Email and password required' }, { status: 400 });
+  if (!identifier || !password) {
+    return Response.json({ message: 'Email/username and password required' }, { status: 400 });
   }
 
   const db = drizzle(context.env.DB);
 
-  const user = await db.select().from(users).where(eq(users.email, email)).get();
+  // Check both email and username
+  const user = await db.select().from(users).where(
+    or(eq(users.email, identifier), eq(users.username, identifier))
+  ).get();
 
   if (!user) {
     return Response.json({ message: 'Invalid credentials' }, { status: 401 });
+  }
+
+  // Check if account is active
+  if (!user.isActive) {
+    return Response.json({ message: 'Account is disabled' }, { status: 401 });
   }
 
   // Simple password verification (in production, use proper hashing like bcrypt)
@@ -29,9 +38,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ message: 'Invalid credentials' }, { status: 401 });
   }
 
-  // Create JWT token
+  // Create JWT token with role
   const token = await createToken(
-    { userId: user.id, email: user.email },
+    { userId: user.id, email: user.email, role: user.role as UserRole },
     context.env.JWT_SECRET
   );
 
@@ -40,7 +49,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     user: {
       id: user.id,
       email: user.email,
+      username: user.username,
       name: user.name,
+      role: user.role,
     },
   });
 };
@@ -55,7 +66,7 @@ async function verifyPassword(password: string, hash: string): Promise<boolean> 
   return hashHex === hash;
 }
 
-async function createToken(payload: { userId: number; email: string }, secret: string): Promise<string> {
+async function createToken(payload: { userId: number; email: string; role: UserRole }, secret: string): Promise<string> {
   const header = { alg: 'HS256', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
   const tokenPayload = {

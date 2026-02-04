@@ -22,11 +22,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   return Response.json(items);
 };
 
-// POST /api/items - Create catalog item
+// POST /api/items - Create catalog item (admin/manager only)
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const auth = await verifyAuth(context.request, context.env.JWT_SECRET);
   if (!auth) {
     return Response.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Only admin and manager can create catalog items
+  if (auth.role !== 'admin' && auth.role !== 'manager') {
+    return Response.json({ message: 'Forbidden' }, { status: 403 });
   }
 
   const body = await context.request.json() as {

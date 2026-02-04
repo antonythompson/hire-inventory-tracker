@@ -12,9 +12,10 @@ interface Order {
 
 interface OrdersProps {
   onSelectOrder: (id: number) => void;
+  canDelete?: boolean;
 }
 
-export function Orders({ onSelectOrder }: OrdersProps) {
+export function Orders({ onSelectOrder, canDelete = true }: OrdersProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('active');

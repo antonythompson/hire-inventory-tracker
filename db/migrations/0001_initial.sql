@@ -1,7 +1,7 @@
--- Initial schema migration
+-- Initial schema migration (idempotent)
 
 -- Users (staff who can log in)
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE users (
 );
 
 -- Item catalog (pre-defined hire items)
-CREATE TABLE catalog_items (
+CREATE TABLE IF NOT EXISTS catalog_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   category TEXT,
@@ -19,7 +19,7 @@ CREATE TABLE catalog_items (
 );
 
 -- Orders
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   customer_name TEXT NOT NULL,
   customer_phone TEXT,
@@ -37,7 +37,7 @@ CREATE TABLE orders (
 );
 
 -- Order line items
-CREATE TABLE order_items (
+CREATE TABLE IF NOT EXISTS order_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
   catalog_item_id INTEGER REFERENCES catalog_items(id),
@@ -53,6 +53,6 @@ CREATE TABLE order_items (
 );
 
 -- Indexes for common queries
-CREATE INDEX idx_orders_status ON orders(status);
-CREATE INDEX idx_orders_expected_return ON orders(expected_return_date);
-CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_expected_return ON orders(expected_return_date);
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);

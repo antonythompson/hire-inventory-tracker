@@ -8,11 +8,16 @@ interface Env {
   JWT_SECRET: string;
 }
 
-// PUT /api/items/:id - Update catalog item
+// PUT /api/items/:id - Update catalog item (admin/manager only)
 export const onRequestPut: PagesFunction<Env> = async (context) => {
   const auth = await verifyAuth(context.request, context.env.JWT_SECRET);
   if (!auth) {
     return Response.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Only admin and manager can update catalog items
+  if (auth.role !== 'admin' && auth.role !== 'manager') {
+    return Response.json({ message: 'Forbidden' }, { status: 403 });
   }
 
   const id = parseInt(context.params.id as string);
@@ -30,11 +35,16 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   return Response.json({ success: true });
 };
 
-// DELETE /api/items/:id - Delete catalog item
+// DELETE /api/items/:id - Delete catalog item (admin/manager only)
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   const auth = await verifyAuth(context.request, context.env.JWT_SECRET);
   if (!auth) {
     return Response.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Only admin and manager can delete catalog items
+  if (auth.role !== 'admin' && auth.role !== 'manager') {
+    return Response.json({ message: 'Forbidden' }, { status: 403 });
   }
 
   const id = parseInt(context.params.id as string);

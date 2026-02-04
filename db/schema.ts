@@ -5,8 +5,11 @@ import { sql } from 'drizzle-orm';
 export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   email: text('email').notNull().unique(),
+  username: text('username').unique(),
   passwordHash: text('password_hash').notNull(),
   name: text('name').notNull(),
+  role: text('role', { enum: ['admin', 'manager', 'staff'] }).default('staff'),
+  isActive: integer('is_active', { mode: 'boolean' }).default(true),
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });
 

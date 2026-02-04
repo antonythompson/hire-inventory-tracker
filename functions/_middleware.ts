@@ -1,8 +1,11 @@
 // Auth middleware helper
 
+export type UserRole = 'admin' | 'manager' | 'staff';
+
 export interface AuthPayload {
   userId: number;
   email: string;
+  role: UserRole;
   iat: number;
   exp: number;
 }

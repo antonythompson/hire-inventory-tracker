@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import { api } from '../api/client';
+import type { UserRole } from '../lib/permissions';
 
 interface User {
   id: number;
   email: string;
+  username: string | null;
   name: string;
+  role: UserRole;
 }
 
 interface AuthState {
@@ -37,10 +40,10 @@ export function useAuth() {
     }
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (identifier: string, password: string) => {
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
-      const { token, user } = await api.login(email, password);
+      const { token, user } = await api.login(identifier, password);
       localStorage.setItem('token', token);
       setState({ user, loading: false, error: null });
       return true;

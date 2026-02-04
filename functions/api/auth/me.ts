@@ -20,7 +20,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const user = await db.select({
     id: users.id,
     email: users.email,
+    username: users.username,
     name: users.name,
+    role: users.role,
   }).from(users).where(eq(users.id, auth.userId)).get();
 
   if (!user) {

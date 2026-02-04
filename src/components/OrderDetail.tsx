@@ -26,9 +26,10 @@ interface OrderDetailData {
 interface OrderDetailProps {
   orderId: number;
   onBack: () => void;
+  canDelete?: boolean;
 }
 
-export function OrderDetail({ orderId, onBack }: OrderDetailProps) {
+export function OrderDetail({ orderId, onBack, canDelete = true }: OrderDetailProps) {
   const [order, setOrder] = useState<OrderDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -421,9 +422,9 @@ interface AddItemModalProps {
 
 function AddItemModal({ orderId, onClose, onAdded }: AddItemModalProps) {
   const [catalogItems, setCatalogItems] = useState<Array<{ id: number; name: string; category: string | null }>>([]);
-  const [selectedItem, setSelectedItem] = useState<number | null>(null);
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [customName, setCustomName] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  const [customQty, setCustomQty] = useState(1);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<'catalog' | 'custom'>('catalog');
 
@@ -437,11 +438,22 @@ function AddItemModal({ orderId, onClose, onAdded }: AddItemModalProps) {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.addItemToOrder(orderId, {
-        catalogItemId: mode === 'catalog' ? selectedItem! : undefined,
-        customItemName: mode === 'custom' ? customName : undefined,
-        quantity,
-      });
+      if (mode === 'catalog') {
+        // Add all items with qty > 0
+        const itemsToAdd = Object.entries(quantities)
+          .filter(([, qty]) => qty > 0)
+          .map(([id, qty]) => ({ catalogItemId: parseInt(id), quantity: qty }));
+
+        for (const item of itemsToAdd) {
+          await api.addItemToOrder(orderId, item);
+        }
+      } else {
+        // Add custom item
+        await api.addItemToOrder(orderId, {
+          customItemName: customName,
+          quantity: customQty,
+        });
+      }
       onAdded();
     } catch (err) {
       console.error(err);
@@ -449,13 +461,17 @@ function AddItemModal({ orderId, onClose, onAdded }: AddItemModalProps) {
     }
   };
 
-  const canSubmit = mode === 'catalog' ? selectedItem !== null : customName.trim() !== '';
+  const totalItems = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
+  const canSubmit = mode === 'catalog' ? totalItems > 0 : customName.trim() !== '';
+
+  // Group items by category
+  const categories = [...new Set(catalogItems.map((i) => i.category || 'Other'))];
 
   return (
     <div class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90vh] overflow-auto">
-        <div class="sticky top-0 bg-white px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-          <h3 class="font-semibold text-slate-800">Add Item</h3>
+      <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90vh] overflow-auto">
+        <div class="sticky top-0 bg-white px-4 py-3 border-b border-slate-200 flex items-center justify-between z-10">
+          <h3 class="font-semibold text-slate-800">Add Items</h3>
           <button onClick={onClose} class="text-slate-400 hover:text-slate-600">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -491,88 +507,108 @@ function AddItemModal({ orderId, onClose, onAdded }: AddItemModalProps) {
           </div>
 
           {mode === 'catalog' ? (
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">
-                Select Item
-              </label>
-              <div class="space-y-2 max-h-48 overflow-y-auto">
-                {catalogItems.map((item) => (
-                  <label
-                    key={item.id}
-                    class={`flex items-center p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedItem === item.id
-                        ? 'border-slate-800 bg-slate-50'
-                        : 'border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="catalogItem"
-                      value={item.id}
-                      checked={selectedItem === item.id}
-                      onChange={() => setSelectedItem(item.id)}
-                      class="sr-only"
-                    />
-                    <div>
-                      <p class="font-medium text-slate-800">{item.name}</p>
-                      {item.category && (
-                        <p class="text-xs text-slate-500">{item.category}</p>
-                      )}
-                    </div>
-                  </label>
-                ))}
-              </div>
+            <div class="space-y-4">
+              {categories.map((category) => (
+                <div key={category}>
+                  <h4 class="text-sm font-medium text-slate-500 mb-2">{category}</h4>
+                  <div class="space-y-2">
+                    {catalogItems
+                      .filter((item) => (item.category || 'Other') === category)
+                      .map((item) => (
+                        <div
+                          key={item.id}
+                          class="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                        >
+                          <span class="font-medium text-slate-800 flex-1">{item.name}</span>
+                          <div class="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setQuantities((q) => ({
+                                ...q,
+                                [item.id]: Math.max(0, (q[item.id] || 0) - 1)
+                              }))}
+                              class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300 text-lg font-medium"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              min="0"
+                              value={quantities[item.id] || 0}
+                              onInput={(e) => {
+                                const val = parseInt((e.target as HTMLInputElement).value) || 0;
+                                setQuantities((q) => ({ ...q, [item.id]: Math.max(0, val) }));
+                              }}
+                              class="w-12 text-center font-medium text-slate-800 border border-slate-200 rounded py-1"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setQuantities((q) => ({
+                                ...q,
+                                [item.id]: (q[item.id] || 0) + 1
+                              }))}
+                              class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300 text-lg font-medium"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">
-                Item Name
-              </label>
-              <input
-                type="text"
-                value={customName}
-                onInput={(e) => setCustomName((e.target as HTMLInputElement).value)}
-                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none"
-                placeholder="Enter custom item name"
-              />
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">
+                  Item Name
+                </label>
+                <input
+                  type="text"
+                  value={customName}
+                  onInput={(e) => setCustomName((e.target as HTMLInputElement).value)}
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none"
+                  placeholder="Enter custom item name"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">
+                  Quantity
+                </label>
+                <div class="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setCustomQty((q) => Math.max(1, q - 1))}
+                    class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    value={customQty}
+                    onInput={(e) => setCustomQty(parseInt((e.target as HTMLInputElement).value) || 1)}
+                    min="1"
+                    class="w-20 text-center px-2 py-2 border border-slate-300 rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setCustomQty((q) => q + 1)}
+                    class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             </div>
           )}
-
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">
-              Quantity
-            </label>
-            <div class="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200"
-              >
-                -
-              </button>
-              <input
-                type="number"
-                value={quantity}
-                onInput={(e) => setQuantity(parseInt((e.target as HTMLInputElement).value) || 1)}
-                min="1"
-                class="w-20 text-center px-2 py-2 border border-slate-300 rounded-lg"
-              />
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => q + 1)}
-                class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200"
-              >
-                +
-              </button>
-            </div>
-          </div>
 
           <button
             type="submit"
             disabled={loading || !canSubmit}
             class="w-full bg-slate-800 text-white py-3 rounded-lg font-medium hover:bg-slate-700 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Adding...' : 'Add to Order'}
+            {loading ? 'Adding...' : mode === 'catalog' ? `Add ${totalItems} Item${totalItems !== 1 ? 's' : ''} to Order` : 'Add to Order'}
           </button>
         </form>
       </div>

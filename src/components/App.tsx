@@ -4,9 +4,11 @@ import { Dashboard } from './Dashboard';
 import { Orders } from './Orders';
 import { OrderDetail } from './OrderDetail';
 import { ItemCatalog } from './ItemCatalog';
+import { UserManagement } from './UserManagement';
 import { useAuth } from '../hooks/useAuth';
+import { canManageUsers, canManageCatalog, canDeleteOrders } from '../lib/permissions';
 
-type View = 'dashboard' | 'orders' | 'order-detail' | 'catalog';
+type View = 'dashboard' | 'orders' | 'order-detail' | 'catalog' | 'users';
 
 export function App() {
   const { user, loading, logout } = useAuth();
@@ -41,7 +43,16 @@ export function App() {
       <header class="bg-slate-800 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50">
         <h1 class="text-lg font-semibold">Fanfare Inventory</h1>
         <div class="flex items-center gap-4">
-          <span class="text-sm text-slate-300">{user.name}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-slate-300">{user.name}</span>
+            <span class={`text-xs px-2 py-0.5 rounded-full ${
+              user.role === 'admin' ? 'bg-purple-600 text-purple-100' :
+              user.role === 'manager' ? 'bg-blue-600 text-blue-100' :
+              'bg-slate-600 text-slate-100'
+            }`}>
+              {user.role}
+            </span>
+          </div>
           <button
             onClick={logout}
             class="text-sm text-slate-400 hover:text-white transition-colors"
@@ -54,11 +65,12 @@ export function App() {
       {/* Main content */}
       <main class="flex-1 p-4 max-w-4xl mx-auto w-full">
         {view === 'dashboard' && <Dashboard onViewOrders={() => setView('orders')} />}
-        {view === 'orders' && <Orders onSelectOrder={openOrder} />}
+        {view === 'orders' && <Orders onSelectOrder={openOrder} canDelete={canDeleteOrders(user.role)} />}
         {view === 'order-detail' && selectedOrderId && (
-          <OrderDetail orderId={selectedOrderId} onBack={backToOrders} />
+          <OrderDetail orderId={selectedOrderId} onBack={backToOrders} canDelete={canDeleteOrders(user.role)} />
         )}
-        {view === 'catalog' && <ItemCatalog />}
+        {view === 'catalog' && <ItemCatalog canManage={canManageCatalog(user.role)} />}
+        {view === 'users' && canManageUsers(user.role) && <UserManagement currentUser={user} />}
       </main>
 
       {/* Bottom navigation */}
@@ -82,6 +94,14 @@ export function App() {
             icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
             label="Catalog"
           />
+          {canManageUsers(user.role) && (
+            <NavButton
+              active={view === 'users'}
+              onClick={() => setView('users')}
+              icon="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              label="Users"
+            />
+          )}
         </div>
       </nav>
     </div>

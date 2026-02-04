@@ -83,11 +83,16 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   return Response.json({ success: true });
 };
 
-// DELETE /api/orders/:id - Delete order
+// DELETE /api/orders/:id - Delete order (admin/manager only)
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   const auth = await verifyAuth(context.request, context.env.JWT_SECRET);
   if (!auth) {
     return Response.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Only admin and manager can delete orders
+  if (auth.role !== 'admin' && auth.role !== 'manager') {
+    return Response.json({ message: 'Forbidden' }, { status: 403 });
   }
 
   const id = parseInt(context.params.id as string);
