@@ -12,8 +12,14 @@ binding = "DB"
 database_name = "hire-tracker"
 database_id = "cc1aa46f-ea6e-4ad1-a45f-2f31a3694c4a"
 
+# R2 Storage for images
+# Local dev simulates R2 automatically, production uses the real bucket
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "fanfare-images"
+
 # Environment variables (set via wrangler secret)
 # JWT_SECRET - for signing JWT tokens
 
 [vars]
-ENVIRONMENT = "development"
+ENVIRONMENT = "production"

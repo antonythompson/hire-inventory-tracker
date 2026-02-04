@@ -6,6 +6,7 @@ interface CatalogItem {
   name: string;
   category: string | null;
   description: string | null;
+  imageUrl: string | null;
   isActive: boolean;
 }
 
@@ -120,12 +121,27 @@ export function ItemCatalog({ canManage = true }: Props) {
               }`}
             >
               <div class="flex items-center justify-between">
-                <div class="flex-1">
-                  <h3 class="font-medium text-slate-800">{item.name}</h3>
-                  <p class="text-sm text-slate-500">
-                    {item.category || 'No category'}
-                    {item.description && ` • ${item.description}`}
-                  </p>
+                <div class="flex items-center gap-3 flex-1">
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      class="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  )}
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-medium text-slate-800 truncate">{item.name}</h3>
+                    <p class="text-sm text-slate-500 truncate">
+                      {item.category || 'No category'}
+                      {item.description && ` • ${item.description}`}
+                    </p>
+                  </div>
                 </div>
                 <div class="flex items-center gap-2">
                   {canManage ? (
@@ -204,7 +220,30 @@ function ItemModal({ item, categories, onClose, onSave }: ItemModalProps) {
   const [name, setName] = useState(item?.name || '');
   const [category, setCategory] = useState(item?.category || '');
   const [description, setDescription] = useState(item?.description || '');
+  const [imageUrl, setImageUrl] = useState(item?.imageUrl || '');
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const handleImageUpload = async (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const result = await api.uploadImage(file);
+      setImageUrl(result.url);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageUrl('');
+  };
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
@@ -215,12 +254,14 @@ function ItemModal({ item, categories, onClose, onSave }: ItemModalProps) {
           name,
           category: category || undefined,
           description: description || undefined,
+          imageUrl: imageUrl || undefined,
         });
       } else {
         await api.createCatalogItem({
           name,
           category: category || undefined,
           description: description || undefined,
+          imageUrl: imageUrl || undefined,
         });
       }
       onSave();
@@ -289,6 +330,53 @@ function ItemModal({ item, categories, onClose, onSave }: ItemModalProps) {
               class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 outline-none"
               placeholder="Optional description"
             />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">
+              Image
+            </label>
+            {imageUrl ? (
+              <div class="relative inline-block">
+                <img
+                  src={imageUrl}
+                  alt="Item preview"
+                  class="w-24 h-24 rounded-lg object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <label class="flex items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-slate-400 transition-colors">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleImageUpload}
+                  class="hidden"
+                  disabled={uploading}
+                />
+                {uploading ? (
+                  <div class="flex items-center gap-2 text-slate-500">
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-500"></div>
+                    <span class="text-sm">Uploading...</span>
+                  </div>
+                ) : (
+                  <div class="text-center">
+                    <svg class="w-8 h-8 text-slate-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span class="text-sm text-slate-500">Add image</span>
+                  </div>
+                )}
+              </label>
+            )}
           </div>
 
           <button

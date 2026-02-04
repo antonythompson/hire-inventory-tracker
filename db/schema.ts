@@ -19,6 +19,7 @@ export const catalogItems = sqliteTable('catalog_items', {
   name: text('name').notNull(),
   category: text('category'),
   description: text('description'),
+  imageUrl: text('image_url'),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
 });
 

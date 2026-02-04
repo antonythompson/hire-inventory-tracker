@@ -172,6 +172,7 @@ export const api = {
       name: string;
       category: string | null;
       description: string | null;
+      imageUrl: string | null;
       isActive: boolean;
     }>>('/items'),
 
@@ -179,6 +180,7 @@ export const api = {
     name: string;
     category?: string;
     description?: string;
+    imageUrl?: string;
   }) =>
     request<{ id: number }>('/items', {
       method: 'POST',
@@ -189,6 +191,7 @@ export const api = {
     name: string;
     category: string;
     description: string;
+    imageUrl: string;
     isActive: boolean;
   }>) =>
     request<{ success: boolean }>(`/items/${id}`, {
@@ -198,6 +201,31 @@ export const api = {
 
   deleteCatalogItem: (id: number) =>
     request<{ success: boolean }>(`/items/${id}`, { method: 'DELETE' }),
+
+  // Images
+  uploadImage: async (file: File) => {
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${BASE_URL}/images/upload`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+      throw new Error(error.message || 'Upload failed');
+    }
+
+    return response.json() as Promise<{ url: string; filename: string }>;
+  },
+
+  deleteImage: (path: string) =>
+    request<{ success: boolean }>(`/images/${path}`, { method: 'DELETE' }),
 
   // Users
   getUsers: () =>

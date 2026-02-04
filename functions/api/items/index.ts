@@ -38,6 +38,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     name: string;
     category?: string;
     description?: string;
+    imageUrl?: string;
   };
 
   if (!body.name) {
@@ -50,6 +51,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     name: body.name,
     category: body.category,
     description: body.description,
+    imageUrl: body.imageUrl,
     isActive: true,
   }).returning({ id: catalogItems.id });
 

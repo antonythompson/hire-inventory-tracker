@@ -25,6 +25,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     name: string;
     category: string;
     description: string;
+    imageUrl: string;
     isActive: boolean;
   }>;
 
