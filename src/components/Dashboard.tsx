@@ -109,7 +109,7 @@ export function Dashboard({ onViewOrders }: DashboardProps) {
                   </p>
                   <p class="text-xs text-slate-500">
                     {activity.itemCount} item{activity.itemCount !== 1 ? 's' : ''}{' '}
-                    {activity.type === 'checkout' ? 'checked out' : 'returned'}
+                    {activity.type === 'checkout' ? 'picked up' : 'returned'}
                   </p>
                 </div>
                 <div class="text-xs text-slate-400">

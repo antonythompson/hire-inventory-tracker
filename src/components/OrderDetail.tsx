@@ -111,7 +111,7 @@ export function OrderDetail({ orderId, onBack, canDelete = true }: OrderDetailPr
         )}
         {order.eventDate && (
           <p class="text-sm">
-            <span class="text-slate-500">Event:</span> {formatDate(order.eventDate)}
+            <span class="text-slate-500">Pickup:</span> {formatDate(order.eventDate)}
           </p>
         )}
         {order.expectedReturnDate && (
@@ -178,7 +178,7 @@ export function OrderDetail({ orderId, onBack, canDelete = true }: OrderDetailPr
             onClick={() => setShowCheckout(true)}
             class="flex-1 bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors"
           >
-            Check Out
+            Pickup
           </button>
         )}
         {canCheckin && (
@@ -186,7 +186,7 @@ export function OrderDetail({ orderId, onBack, canDelete = true }: OrderDetailPr
             onClick={() => setShowCheckin(true)}
             class="flex-1 bg-green-500 text-white py-3 rounded-lg font-medium hover:bg-green-600 transition-colors"
           >
-            Check In
+            Return
           </button>
         )}
       </div>
@@ -317,7 +317,7 @@ function CheckModal({ type, items, onClose, onSubmit }: CheckModalProps) {
       <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90vh] overflow-auto">
         <div class="sticky top-0 bg-white px-4 py-3 border-b border-slate-200 flex items-center justify-between">
           <h3 class="font-semibold text-slate-800">
-            {type === 'checkout' ? 'Check Out Items' : 'Check In Items'}
+            {type === 'checkout' ? 'Pickup Items' : 'Return Items'}
           </h3>
           <button onClick={onClose} class="text-slate-400 hover:text-slate-600">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -397,7 +397,7 @@ function CheckModal({ type, items, onClose, onSubmit }: CheckModalProps) {
           >
             {loading
               ? 'Processing...'
-              : `${type === 'checkout' ? 'Check Out' : 'Check In'} ${totalSelected} Items`}
+              : `${type === 'checkout' ? 'Pickup' : 'Return'} ${totalSelected} Items`}
           </button>
         </div>
       </div>

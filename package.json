@@ -10,10 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-
     "pages:dev": "wrangler pages dev dist --d1 DB=hire-tracker --live-reload --persist-to=.wrangler/state",
     "pages:deploy": "npm run build && wrangler pages deploy dist",
-
     "db:create": "wrangler d1 create hire-tracker",
     "migrate": "node scripts/migrate.js",
     "migrate:prod": "node scripts/migrate.js --remote",
@@ -23,15 +21,14 @@
     "db:query:prod": "wrangler d1 execute hire-tracker --remote --command",
     "db:studio": "drizzle-kit studio",
     "db:reset": "rm -rf .wrangler/state && npm run migrate",
-
     "secret:set": "wrangler secret put",
     "deploy": "npm run build && wrangler pages deploy dist --project-name=fanfare-inventory-tracker",
     "deploy:prod": "npm run build && wrangler pages deploy dist --project-name=fanfare-inventory-tracker --branch=main"
   },
   "dependencies": {
+    "drizzle-orm": "^0.29.3",
     "preact": "^10.19.3",
-    "preact-router": "^4.1.2",
-    "drizzle-orm": "^0.29.3"
+    "preact-router": "^4.1.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240117.0",

@@ -203,7 +203,7 @@ function NewOrderModal({ onClose, onCreated }: NewOrderModalProps) {
 
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">
-              Event Date
+              Pickup Date
             </label>
             <input
               type="date"
