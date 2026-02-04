@@ -107,7 +107,7 @@ export function UserManagement({ currentUser }: Props) {
                 <td class="px-4 py-3 text-sm text-slate-600 hidden sm:table-cell">
                   <div>{user.email}</div>
                   {user.username && (
-                    <div class="text-xs text-slate-400">@{user.username}</div>
+                    <div class="text-xs text-slate-400">{user.username}</div>
                   )}
                 </td>
                 <td class="px-4 py-3">
@@ -505,9 +505,11 @@ function PasswordModal({ user, isAdmin, isSelf, onClose }: PasswordModalProps) {
     setError(null);
 
     try {
-      if (isSelf) {
+      if (isSelf && !isAdmin) {
+        // Non-admin changing own password - needs current password
         await api.changePassword(currentPassword, newPassword);
       } else {
+        // Admin can change any password (including own) without current
         await api.changeUserPassword(user.id, newPassword);
       }
       setSuccess(true);
